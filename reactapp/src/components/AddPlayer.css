@@ -1,0 +1,401 @@
+/* AddPlayer.css — creative + animated form styles
+   Works with your existing AddPlayer component (no JS changes)
+*/
+
+/* -------------------------
+   Theme variables
+   ------------------------- */
+:root{
+  --bg-1: #eef6ff;
+  --bg-2: #f8fbff;
+  --card-bg: rgba(255,255,255,0.78);
+  --glass-border: rgba(255,255,255,0.7);
+  --accent-a: #6b7cff;
+  --accent-b: #8b4cff;
+  --accent-c: #06b6d4;
+  --muted: #6b7280;
+  --text: #071133;
+  --danger: #ef4444;
+  --success: #10b981;
+  --shadow-lg: 0 20px 48px rgba(9,10,25,0.08);
+  --radius-lg: 18px;
+  --radius-md: 12px;
+}
+
+/* -------------------------
+   Page container + decorations
+   ------------------------- */
+.form-container {
+  position: relative;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+  box-sizing: border-box;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  color: var(--text);
+}
+
+/* decorative blurred blobs behind the card */
+.form-container::before,
+.form-container::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(36px);
+  opacity: 0.9;
+}
+.form-container::before {
+  width: 520px;
+  height: 520px;
+  left: 6%;
+  top: -8%;
+  background: radial-gradient(circle at 30% 30%, rgba(139,76,255,0.14), transparent 32%),
+              radial-gradient(circle at 70% 70%, rgba(6,182,212,0.06), transparent 36%);
+}
+.form-container::after {
+  width: 380px;
+  height: 380px;
+  right: 6%;
+  bottom: -6%;
+  background: radial-gradient(circle at 20% 50%, rgba(107,124,255,0.09), transparent 32%);
+}
+
+/* -------------------------
+   Card
+   ------------------------- */
+.form-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 980px;
+  padding: 32px;
+  border-radius: calc(var(--radius-lg) + 2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,255,0.92));
+  border: 1px solid rgba(11,14,35,0.04);
+  box-sizing: border-box;
+  overflow: visible;
+  transform-origin: center;
+  animation: cardEntrance .44s cubic-bezier(.2,.9,.22,1);
+}
+
+/* small decorative topstripe */
+.form-header {
+  width: 84px;
+  height: 6px;
+  border-radius: 999px;
+  margin: -22px 0 18px 18px;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  box-shadow: 0 10px 30px rgba(107,124,255,0.08);
+}
+
+/* -------------------------
+   Title
+   ------------------------- */
+.player-form h2 {
+  margin: 4px 0 18px 0;
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text);
+}
+
+/* -------------------------
+   Grid layout
+   ------------------------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 28px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+/* group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* labels */
+.form-group label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+  transition: color .14s ease, transform .12s ease;
+}
+
+/* -------------------------
+   Inputs / Selects
+   ------------------------- */
+input[type="text"],
+input[type="tel"],
+select,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(11,14,35,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(250,250,255,0.96));
+  box-shadow: 0 8px 20px rgba(9,10,20,0.03), inset 0 1px 0 rgba(255,255,255,0.6);
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: box-shadow .16s ease, transform .12s ease, border-color .12s ease;
+  -webkit-appearance: none;
+}
+
+/* select custom arrow */
+select {
+  padding-right: 44px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(9,10,20,0.45) 50%),
+    linear-gradient(135deg, rgba(9,10,20,0.45) 50%, transparent 50%);
+  background-position: calc(100% - 12px) calc(50% - 6px), calc(100% - 7px) calc(50% - 6px);
+  background-size: 8px 8px, 8px 8px;
+  background-repeat: no-repeat;
+}
+
+/* input focus (lift + glow) */
+input:focus, select:focus, textarea:focus {
+  transform: translateY(-3px);
+  border-color: rgba(107,124,255,0.95);
+  box-shadow: 0 18px 36px rgba(107,124,255,0.08);
+}
+
+/* subtle caret and placeholder color */
+input::placeholder, textarea::placeholder {
+  color: #9aa4b2;
+}
+
+/* -------------------------
+   Floating label effect (visual only)
+   ------------------------- */
+.form-group input:focus + .label-inline,
+.form-group input:not(:placeholder-shown) + .label-inline,
+.form-group select:focus + .label-inline,
+.form-group select:not([value=""]) + .label-inline {
+  color: var(--accent-a);
+  transform: translateY(-6px) scale(.98);
+}
+
+/* If you wish to use label inline technique, add markup; current labels remain above inputs — we keep this for future use */
+
+/* -------------------------
+   Error states
+   ------------------------- */
+.error-field {
+  border-color: rgba(239,68,68,0.92) !important;
+  box-shadow: 0 10px 28px rgba(239,68,68,0.06) !important;
+}
+.error {
+  color: var(--danger);
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* -------------------------
+   Divider
+   ------------------------- */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(11,14,35,0.02), rgba(11,14,35,0.06), rgba(11,14,35,0.02));
+  margin: 18px 0;
+  border-radius: 999px;
+}
+
+/* -------------------------
+   Submit button (animated gradient)
+   ------------------------- */
+.submit-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  border: 0;
+  color: white;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  box-shadow: 0 18px 40px rgba(139,76,255,0.12), 0 6px 18px rgba(9,10,20,0.06);
+  transition: transform .18s cubic-bezier(.2,.9,.25,1), box-shadow .12s ease, opacity .12s ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+/* glowing waves inside button */
+.submit-btn::before {
+  content: "";
+  position: absolute;
+  left: -60%;
+  top: -40%;
+  width: 220%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), transparent 15%),
+              linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  transform: rotate(12deg);
+  opacity: 0.6;
+  transition: transform .8s ease;
+}
+
+/* hover/active */
+.submit-btn:hover:not([disabled]) {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 30px 64px rgba(107,124,255,0.16);
+}
+.submit-btn:active:not([disabled]) {
+  transform: translateY(-2px) scale(.995);
+}
+
+/* disabled */
+.submit-btn[disabled] {
+  opacity: 0.62;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* icon inside button */
+.submit-btn .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* small "bounce" micro-animation on submit (visual only) */
+@keyframes btnBounce {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-6px) scale(1.02); }
+  80% { transform: translateY(-2px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* -------------------------
+   Popup modal
+   ------------------------- */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(rgba(2,6,23,0.44), rgba(2,6,23,0.56));
+  z-index: 9999;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.popup {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fff, #fbfdff);
+  box-shadow: 0 28px 70px rgba(2,6,23,0.48);
+  border: 1px solid rgba(11,14,35,0.06);
+  transform-origin: center;
+  animation: popupIn .22s cubic-bezier(.2,.9,.28,1);
+}
+
+/* success vs error */
+.popup.success .popup-content h3 { color: var(--success); }
+.popup.error .popup-content h3 { color: var(--danger); }
+
+.popup-content {
+  padding: 20px;
+  text-align: center;
+}
+.popup-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+.popup-content p {
+  margin: 0 0 16px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* popup close button */
+.popup-close-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 0;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(139,76,255,0.12);
+}
+
+/* success pulse / confetti hint */
+.popup.success::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -18%;
+  width: 220px;
+  height: 220px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 50% 50%, rgba(16,185,129,0.12), transparent 40%);
+  filter: blur(20px);
+  opacity: 0.95;
+  pointer-events: none;
+  animation: pulseSuccess 1.4s ease-out;
+}
+@keyframes pulseSuccess {
+  from { transform: translateX(-50%) scale(.8); opacity: 0.8; }
+  to { transform: translateX(-50%) scale(1.05); opacity: 0; }
+}
+
+/* popup entrance */
+@keyframes popupIn {
+  from { transform: translateY(-8px) scale(.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* -------------------------
+   Responsive
+   ------------------------- */
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr; gap: 12px; }
+  .form-card { padding: 20px; border-radius: 12px; }
+  .player-form h2 { font-size: 22px; }
+  .submit-btn { width: 100%; justify-content: center; }
+}
+
+/* -------------------------
+   Entrance animation for card
+   ------------------------- */
+@keyframes cardEntrance {
+  0% { transform: translateY(10px) scale(.996); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* -------------------------
+   Reduced motion
+   ------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .form-card,
+  .submit-btn,
+  .popup,
+  .form-container::before,
+  .form-container::after { animation: none !important; transition: none !important; transform: none !important; filter: none !important; }
+}

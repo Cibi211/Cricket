@@ -1,0 +1,130 @@
+/* layout.css - header and footer styling used app-wide */
+
+/* Variables */
+:root {
+  --header-bg: rgba(9, 30, 66, 0.6);  /* translucent navy */
+  --header-bg-blur: 8px;
+  --brand-color: #ffffff;
+  --nav-color: rgba(255,255,255,0.95);
+  --nav-active: rgba(255,255,255,1);
+  --footer-bg: #111111;
+  --footer-color: #e6e6e6;
+  --max-width: 1200px;
+}
+
+/* Reset a couple useful things to ensure consistent full-bleed */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* App root layout: column so footer sits below content */
+.app-root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header: full-bleed translucent bar */
+.site-header {
+  position: sticky; /* stays at top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  width: 100%;
+  padding: 12px 0;
+  background: var(--header-bg);
+  backdrop-filter: blur(var(--header-bg-blur));
+  box-shadow: 0 6px 18px rgba(7,12,34,0.18);
+}
+
+/* inner constrained content */
+.site-header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand */
+.brand-link {
+  color: var(--brand-color);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+  display: inline-block;
+  padding: 6px 8px;
+}
+
+/* Nav */
+.site-nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+/* Nav items */
+.nav-item {
+  color: var(--nav-color);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background .14s ease, transform .12s ease;
+}
+.nav-item:hover,
+.nav-item:focus {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.04);
+  outline: none;
+}
+.nav-item.active {
+  color: var(--nav-active);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 8px 20px rgba(7,12,34,0.08);
+}
+
+/* Main content area — keep content centered with comfortable padding */
+.app-main {
+  flex: 1 1 auto;
+  padding: 36px 20px;
+  box-sizing: border-box;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Footer — sits at bottom, consistent with screenshot */
+.site-footer {
+  width: 100%;
+  background: var(--footer-bg);
+  color: var(--footer-color);
+  padding: 14px 20px;
+  box-shadow: 0 -6px 18px rgba(2,6,23,0.25);
+}
+
+.site-footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 880px) {
+  .site-header-inner { padding: 0 12px; }
+  .brand-link { font-size: 16px; }
+  .nav-item { padding: 6px 10px; font-size: 14px; }
+  .app-main { padding: 20px 12px; }
+  .site-footer { padding: 12px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-item, .site-header, .site-footer { transition: none !important; }
+}
