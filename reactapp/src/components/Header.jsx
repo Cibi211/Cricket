@@ -1,17 +1,17 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import "./Header.css";
+import { Link } from "react-router-dom";
+// import "./Header.css";
 
 const Header = () => {
-  const navigate = useNavigate();
-
   return (
-    <header className="app-header">
-      <div className="brand">Neo Cricket Tournament Registration</div>
-      <nav className="topnav">
-        <button className="nav-link" onClick={() => navigate("/")}>Home</button>
-        <button className="nav-link" onClick={() => navigate("/viewplayer")}>Players</button>
-        <button className="nav-link" onClick={() => navigate("/addPlayer")}>Register</button>
+    <header className="header">
+      <div className="logo">Neo Cricket</div>
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/addPlayer">Add Player</Link>
+        <Link to="/viewPlayer">View Players</Link>
+        <Link to="/login">Login</Link>
+        <Link to="/signup">Signup</Link>
       </nav>
     </header>
   );

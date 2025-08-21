@@ -1,60 +1,137 @@
 import React, { useEffect, useState } from "react";
-import "./ViewPlayer.css";
+import { useNavigate } from "react-router-dom";
 
+/**
+ * Configure backend here (adjust host/port or use https hosted URL)
+ */
 const BACKEND = "http://localhost:8080";
+// OR if hosted use:
+// const BACKEND = "https://8080-bbadebbcfeeedcbfddebbacbbcefccfc.premiumproject.examly.io";
 
-const fetchJson = async (url) => {
+/**
+ * Helper to read stored credentials from sessionStorage (key 'neo_auth')
+ */
+function readAuthHeader() {
   try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const text = await res.text();
-    let parsed = null;
-    try {
-      parsed = text ? JSON.parse(text) : null;
-    } catch (e) {
-      console.error("Response not valid JSON:", text);
-    }
-
-    return { ok: res.ok, status: res.status, body: parsed };
-  } catch (err) {
-    console.error("Network error:", err);
-    throw err;
+    const raw = sessionStorage.getItem("neo_auth");
+    if (!raw) return null;
+    const creds = JSON.parse(raw);
+    return "Basic " + btoa(`${creds.username}:${creds.password}`);
+  } catch {
+    return null;
   }
-};
+}
+
+/**
+ * Helper to prompt and store credentials if not present.
+ * (Copy of prompt helper used in AddPlayer)
+ */
+function getAuthHeader() {
+  const key = "neo_auth";
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (raw) {
+      const creds = JSON.parse(raw);
+      return "Basic " + btoa(`${creds.username}:${creds.password}`);
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  const username = prompt("Enter API username:");
+  if (!username) return null;
+  const password = prompt("Enter API password:");
+  if (!password) return null;
+
+  const obj = { username, password };
+  try {
+    sessionStorage.setItem(key, JSON.stringify(obj));
+  } catch (e) {
+    console.warn("sessionStorage set failed", e);
+  }
+  return "Basic " + btoa(`${username}:${password}`);
+}
 
 const ViewPlayer = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const doGet = async (url, auth) => {
+    console.log("GET ->", url);
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: auth,
+        },
+      });
+      const text = await res.text().catch(() => "");
+      if (!res.ok) {
+        console.warn(`GET ${url} returned status ${res.status}`);
+        return { ok: false, status: res.status, rawText: text };
+      }
+      // try to parse JSON
+      try {
+        const json = text ? JSON.parse(text) : [];
+        return { ok: true, body: json };
+      } catch (e) {
+        console.warn("Failed to parse JSON from", url, e);
+        return { ok: false, status: res.status, rawText: text };
+      }
+    } catch (err) {
+      console.error("Network/fetch error when GET", url, err);
+      return { ok: false, error: err };
+    }
+  };
 
   const loadPlayers = async () => {
     setLoading(true);
-    setError(null);
 
-    try {
-      const { ok, status, body } = await fetchJson(`${BACKEND}/getAllPlayer`);
-      if (!ok) {
+    let auth = readAuthHeader();
+    if (!auth) {
+      auth = getAuthHeader();
+      if (!auth) {
         setPlayers([]);
-        setError(`Failed to fetch players (status ${status})`);
+        setLoading(false);
         return;
       }
+    }
 
-      let arr = [];
-      if (Array.isArray(body)) {
-        arr = body;
-      } else if (body && Array.isArray(body.data)) {
-        arr = body.data;
-      } else if (body && typeof body === "object") {
-        arr = [body];
+    try {
+      // 1) Try relative (works if proxy configured)
+      let result = await doGet("/getAllPlayer", auth);
+
+      // 2) If relative failed, try configured BACKEND
+      if (!result.ok) {
+        console.warn("Relative GET failed or non-ok, trying BACKEND...", result);
+        result = await doGet(`${BACKEND}/getAllPlayer`, auth);
       }
 
-      setPlayers(arr);
+      // 3) fallback: known hosted examly url (in case BACKEND isn't correct)
+      if (!result.ok) {
+        console.warn("BACKEND GET failed, trying hosted fallback...");
+        result = await doGet(
+          "https://localhost:8080/getAllPlayer",
+          auth
+        );
+      }
+
+      if (!result.ok) {
+        if (result.error) {
+          // network level
+          console.error("Network error loading players:", result.error);
+        } else {
+          console.error("Server error loading players:", result.status, result.rawText || "");
+        }
+        setPlayers([]);
+      } else {
+        setPlayers(Array.isArray(result.body) ? result.body : []);
+      }
     } catch (err) {
+      console.error("Unhandled error loading players:", err);
       setPlayers([]);
-      setError("Network or parsing error — check console.");
     } finally {
       setLoading(false);
     }
@@ -62,57 +139,57 @@ const ViewPlayer = () => {
 
   useEffect(() => {
     loadPlayers();
-    // if you ever want to auto-refresh, you can setInterval here
-    // return cleanup if you do
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    
-    <div className="view-container">
-      
+    <div className="view-player" style={{ padding: 20 }}>
       <h2>All Players</h2>
 
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={loadPlayers}>Refresh</button>
+        <button
+          onClick={() => {
+            sessionStorage.removeItem("neo_auth");
+            alert("Logged out (session).");
+            navigate("/");
+          }}
+          style={{ marginLeft: 8 }}
+        >
+          Logout
+        </button>
+      </div>
+
       {loading ? (
-        <div className="msg">
-          <span className="spinner" aria-hidden="true" /> Loading players…
-        </div>
-      ) : error ? (
-        <div className="msg error-msg" role="alert">
-          {error}
-        </div>
+        <div>Loading players…</div>
       ) : players.length === 0 ? (
-        <div className="msg">No players found.</div>
+        <div>No players registered yet.</div>
       ) : (
-        <div className="table-card" role="region" aria-label="Players table">
-          <div className="table-scroll">
-            <table className="players-table">
-              <thead>
-                <tr>
-                  <th>Player Name</th>
-                  <th>Player City</th>
-                  <th>Phone</th>
-                  <th>Played In</th>
-                  <th>Player Type</th>
-                  <th>Last Played For</th>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: "left", padding: 8 }}>Player Name</th>
+                <th style={{ textAlign: "left", padding: 8 }}>Player City</th>
+                <th style={{ textAlign: "left", padding: 8 }}>Phone</th>
+                <th style={{ textAlign: "left", padding: 8 }}>Played In</th>
+                <th style={{ textAlign: "left", padding: 8 }}>Player Type</th>
+                <th style={{ textAlign: "left", padding: 8 }}>Last Played For</th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map((p, idx) => (
+                <tr key={p.playerId ?? idx}>
+                  <td style={{ padding: 8 }}>{p.playerName}</td>
+                  <td style={{ padding: 8 }}>{p.playerCity}</td>
+                  <td style={{ padding: 8 }}>{p.phone}</td>
+                  <td style={{ padding: 8 }}>{p.playedIn}</td>
+                  <td style={{ padding: 8 }}>{p.playerType}</td>
+                  <td style={{ padding: 8 }}>{p.lastPlayedFor}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {players.map((p, idx) => {
-                  const key = p.playerId ?? p.id ?? `p-${idx}`;
-                  return (
-                    <tr key={key}>
-                      <td data-label="Player Name">{p.playerName ?? p.name ?? "-"}</td>
-                      <td data-label="Player City">{p.playerCity ?? p.city ?? "-"}</td>
-                      <td data-label="Phone">{p.phone ?? "-"}</td>
-                      <td data-label="Played In">{p.playedIn ?? "-"}</td>
-                      <td data-label="Player Type">{p.playerType ?? "-"}</td>
-                      <td data-label="Last Played For">{p.lastPlayedFor ?? "-"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
